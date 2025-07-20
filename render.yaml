@@ -1,0 +1,34 @@
+services:
+  # Serviço FastAPI
+  - type: web
+    name: ml-recruitment-api
+    env: python
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt &&
+      cd api_interna &&
+      pip install -r requirements.txt &&
+      pip install -e .
+    startCommand: uvicorn api.main:vApp --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PORT
+        value: 8000
+
+  # Serviço Streamlit
+  - type: web
+    name: ml-recruitment-streamlit
+    env: python
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt &&
+      cd api_interna &&
+      pip install -r requirements.txt &&
+      pip install -e .
+    startCommand: streamlit run app_streamlit.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PORT
+        value: 8501

@@ -119,6 +119,47 @@ streamlit run app_streamlit.py --server.port=8501 --server.address=0.0.0.0
 
 ---
 
+## 🌐 Deploy no Render (Gratuito)
+
+### Pré-requisitos
+1. Conta no [Render](https://render.com)
+2. Repositório no GitHub com este código
+3. Modelos treinados em `etl/output/`
+
+### Opção 1: Deploy Separado (Recomendado)
+
+#### 1. Deploy da API FastAPI
+1. No Render: "New +" → "Web Service"
+2. Conecte seu repositório GitHub
+3. Configure:
+   - **Name**: `ml-recruitment-api`
+   - **Environment**: `Python 3`
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `./start-api.sh`
+
+#### 2. Deploy do Streamlit
+1. Crie outro "Web Service"
+2. Configure:
+   - **Name**: `ml-recruitment-streamlit`
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `./start-streamlit.sh`
+   - **Environment Variables**:
+     - `API_URL`: `https://ml-recruitment-api.onrender.com`
+
+### Opção 2: Deploy com Blueprint
+```bash
+# Commit e push do render.yaml
+git add render.yaml
+git commit -m "Add Render configuration"
+git push
+
+# No Render: "New +" → "Blueprint" → Selecionar repositório
+```
+
+📖 **Guia completo**: Ver [DEPLOY_RENDER.md](./DEPLOY_RENDER.md)
+
+---
+
 ## 🛠️ Desenvolvimento
 
 ### Estrutura dos Serviços

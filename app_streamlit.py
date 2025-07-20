@@ -4,6 +4,11 @@ import joblib
 import json
 import numpy as np
 import requests
+import os
+
+# ======= Configuração da API =======
+# URL da API - pode ser configurada via variável de ambiente
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 # ======= Inicializar session_state com valores padrão =======
 st.session_state.setdefault("nivel_profissional_candidato", "Júnior")
@@ -106,7 +111,7 @@ if st.button("Prever Match"):
         "pCaminhoVetorizador": "etl/output/vetorizador_sim_textual.joblib"
     }
 
-    vResposta = requests.post("http://localhost:8000/prever", json=vJsonRequest)
+    vResposta = requests.post(f"{API_URL}/prever", json=vJsonRequest)
 
     prob = vResposta.json().get("match", 0.0)
     sim_textual = vResposta.json().get("sim_textual", 0.0)

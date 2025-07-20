@@ -11,10 +11,42 @@ services:
       - ./etl/output:/app/etl/output:ro # Modelos somente leitura
     environment:
       - PYTHONPATH=/app
+      - API_URL=http://localhost:8000  # URL da API para o Streamlit
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health", "||", "curl", "-f", "http://localhost:8501/healthz"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health && curl -f http://localhost:8501/healthz || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Serviço separado para produção - FastAPI apenas
+  ml-recruitment-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./etl/data:/app/etl/data:ro
+      - ./etl/output:/app/etl/output:ro
+    environment:
+      - PYTHONPATH=/app
+    command: ["uvicorn", "api.main:vApp", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    profiles: ["production"]
+
+  # Serviço separado para produção - Streamlit apenas
+  ml-recruitment-streamlit:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./etl/data:/app/etl/data:ro
+      - ./etl/output:/app/etl/output:ro
+    environment:
+      - PYTHONPATH=/app
+      - API_URL=http://ml-recruitment-api:8000  # URL interna da API
+    command: ["streamlit", "run", "app_streamlit.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+    restart: unless-stopped
+    profiles: ["production"]
+    depends_on:
+      - ml-recruitment-api

@@ -8,6 +8,20 @@ import pandas as pd
 vApp = FastAPI()
 vML = ML_Recruitment()
 
+@vApp.get("/")
+def root():
+    """
+    Endpoint raiz da API.
+    """
+    return {"message": "ML Recruitment API is running", "status": "healthy"}
+
+@vApp.get("/health")
+def health():
+    """
+    Endpoint de health check para monitoramento.
+    """
+    return {"status": "healthy", "service": "ml-recruitment-api"}
+
 class PreverRequest(BaseModel):
     """
     Modelo de requisição para prever o match entre candidato e vaga.
