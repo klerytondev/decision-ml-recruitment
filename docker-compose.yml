@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ml-recruitment-app:
+    build: .
+    ports:
+      - "8000:8000"  # FastAPI
+      - "8501:8501"  # Streamlit
+    volumes:
+      - ./etl/data:/app/etl/data:ro     # Dados somente leitura
+      - ./etl/output:/app/etl/output:ro # Modelos somente leitura
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health", "||", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

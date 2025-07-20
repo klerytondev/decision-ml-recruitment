@@ -1,32 +1,33 @@
 FROM python:3.11
 
 # Define diretório de trabalho
-WORKDIR /app-streamlit
+WORKDIR /app
 
-# Copia tudo para dentro da imagem
-COPY . /app-streamlit
+# Copia arquivos de dependências primeiro (para cache de layers)
+COPY requirements.txt /app/
+COPY api_interna/requirements.txt /app/api_interna/
+COPY api_interna/pyproject.toml /app/api_interna/
 
 # Atualiza o pip
 RUN pip install --upgrade pip
 
+# Instala dependências principais do Streamlit
+RUN pip install -r requirements.txt
+
 # Instala dependências da FastAPI
-WORKDIR /app-streamlit/api_interna
+WORKDIR /app/api_interna
 RUN pip install -r requirements.txt
 RUN pip install -e .
 
-# Instala dependências do Streamlit
-WORKDIR /app-streamlit/etl
-RUN pip install -r requirements.txt
-
-# Volta para a raiz do projeto
-WORKDIR /app-streamlit
+# Volta para a raiz e copia o resto do projeto
+WORKDIR /app
+COPY . /app/
 
 # Copia e habilita o script de start
-COPY start.sh /app-streamlit/start.sh
-RUN chmod +x /app-streamlit/start.sh
+RUN chmod +x /app/start.sh
 
 # Expõe as portas usadas pelos dois apps
 EXPOSE 8000 8501
 
 # Executa os dois apps
-CMD ["/app-streamlit/start.sh"]
+CMD ["/app/start.sh"]
